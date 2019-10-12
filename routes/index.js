@@ -5,20 +5,23 @@ var router = express.Router();
 /* GET home page. */
 router.get('/', function (req, res) {
     res.render('index', {
-        title: 'Express',
-        temps: DStemps
+        title: 'Express'
     });
 });
 
-var DStemps = [];
+var DStemps = null;
 router.get('/set_temps', function (req, res) {
-
-    if (req.query.temps) {
-        DStemps = JSON.parse(req.query.temps);
-        console.log(DStemps);
-    }
+    DStemps = req.query.temps;
+    console.log(DStemps);
 
     res.send("OK");
+});
+
+router.get('/temps', function (req, res) {
+    res.render('temps', {
+        title: 'Express',
+        temps: DStemps
+    });
 });
 
 

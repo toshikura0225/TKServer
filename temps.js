@@ -6,11 +6,22 @@ console.log(platform);
 
 const fs = require('fs');
 
+const request = require('request');
+
 
 var tempsID = setInterval(() => {
 
     get_wire("28-030897790b03", (temp) => {
-        console.log(temp);
+        console.log(`temp=${temp}`);
+        request({
+            method: 'get',
+            url: `http://localhost:3000/set_temps?temps=${temp}`,
+        }, (error, response, body) => {
+            console.log(`error:${error}`);
+            console.log(`body:${body}`);
+
+        });
+
     });
 
 }, 5000);

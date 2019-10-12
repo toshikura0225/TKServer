@@ -44,6 +44,7 @@
     <Content Include="README.md" />
     <Content Include="views\error.ejs" />
     <Content Include="views\index.ejs" />
+    <Content Include="views\temps.ejs" />
     <Content Include="views\_index.pug" />
     <Content Include="views\layout.pug" />
     <Content Include="views\_error.pug" />
