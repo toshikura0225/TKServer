@@ -36,9 +36,11 @@
     <Content Include="package.json" />
     <Content Include="public\stylesheets\main.css" />
     <Content Include="README.md" />
-    <Content Include="views\index.pug" />
+    <Content Include="views\error.ejs" />
+    <Content Include="views\index.ejs" />
+    <Content Include="views\_index.pug" />
     <Content Include="views\layout.pug" />
-    <Content Include="views\error.pug" />
+    <Content Include="views\_error.pug" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
