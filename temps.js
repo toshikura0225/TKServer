@@ -18,7 +18,7 @@ var tempsID = setInterval(() => {
 function get_wire(ds_id, next) {
 
     if (platform === 'linux') {
-        let path = `sys/bus/w1/devices${ds_id}/w1_slave`;
+        let path = `/sys/bus/w1/devices/${ds_id}/w1_slave`;
 
         fs.readFile(path, 'utf-8', (err, data) => {
 
@@ -26,7 +26,7 @@ function get_wire(ds_id, next) {
             if (err) { throw err; }
             let temp = null;
 
-            if (data.match(/Yes/)) {
+            if (data.match(/YES/)) {
 
                 let matches = data.match(/t=(\d+)/);
                 temp = parseInt(matches[1]) / 1000;
