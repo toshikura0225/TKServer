@@ -19,7 +19,6 @@ console.log(platform);
 
 
 const temps_config = require('./temps.json');
-console.log(`deviceList = ${temps_config}`);
 const deviceList = temps_config["deviceList"];
 
 function main() {
