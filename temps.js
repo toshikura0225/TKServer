@@ -10,11 +10,11 @@ const request = require('request');
 
 const async = require('async');
 var deviceList = {
-    "28-030897790b03": { "offset": -0.984, "value": 0 },
-    "28-0308977986cf": { "offset": -0.57, "value": 0 },
-    "28-030897791fc8": { "offset": 0.73, "value": 0 },
-    "28-030997796347": { "offset": 0.62, "value": 0 },
-    "28-031097791505": { "offset": 0, "value": 0 }
+    "28-030897790b03": { "offset": -0.984, "value": 0 },    // 外気温
+    "28-0308977986cf": { "offset": -0.57, "value": 0 },     // 室温（上部）
+    "28-030897791fc8": { "offset": 0.73, "value": 0 },      // 給水槽
+    "28-030997796347": { "offset": 0.62, "value": 0 },      // 生育槽
+    "28-031097791505": { "offset": 0, "value": 0 }          // 室温（下部）
 };
 
 function main() {
@@ -25,7 +25,7 @@ function main() {
 
         get_wire(id, (temp) => {
             deviceList[id]["value"] = temp + deviceList[id]["offset"];
-            console.log(`temp=${deviceList[id]["value"]}(${temp})`);
+            //console.log(`temp=${deviceList[id]["value"]}(${temp})`);
             next();
         });
     }, (err) => {
@@ -38,8 +38,8 @@ function main() {
             method: 'get',
             url: `http://localhost:3000/set_temps?temps=${temps}`
         }, (error, response, body) => {
-            console.log(`error:${error}`);
-            console.log(`body:${body}`);
+            //console.log(`error:${error}`);
+            //console.log(`body:${body}`);
         });
     });
 
