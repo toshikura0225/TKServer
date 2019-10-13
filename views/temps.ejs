@@ -5,6 +5,7 @@
         <title></title>
     </head>
     <body>
-        <p>Welcome to  <%= temps %></p>
+        <% ts = temps.split(',').join("<br>") %>
+        <p><%- ts %></p>
     </body>
 </html>

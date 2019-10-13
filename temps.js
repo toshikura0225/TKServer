@@ -8,23 +8,45 @@ const fs = require('fs');
 
 const request = require('request');
 
+const async = require('async');
+var deviceList = {
+    "28-030897790b03": { "offset": -0.984, "value": 0 },
+    "28-0308977986cf": { "offset": -0.57, "value": 0 },
+    "28-030897791fc8": { "offset": 0.73, "value": 0 },
+    "28-030997796347": { "offset": 0.62, "value": 0 },
+    "28-031097791505": { "offset": 0, "value": 0 }
+};
 
-var tempsID = setInterval(() => {
+function main() {
 
-    get_wire("28-030897790b03", (temp) => {
-        console.log(`temp=${temp}`);
+    async.eachSeries(Object.keys(deviceList), (id, next) => {
+
+        console.log(`Reading ${id}.`);
+
+        get_wire(id, (temp) => {
+            deviceList[id]["value"] = temp + deviceList[id]["offset"];
+            console.log(`temp=${deviceList[id]["value"]}(${temp})`);
+            next();
+        });
+    }, (err) => {
+        if (err) throw err;
+
+        let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
+        
+
         request({
             method: 'get',
-            url: `http://localhost:3000/set_temps?temps=${temp}`,
+            url: `http://localhost:3000/set_temps?temps=${temps}`
         }, (error, response, body) => {
             console.log(`error:${error}`);
             console.log(`body:${body}`);
-
         });
-
     });
 
-}, 5000);
+}
+
+//var tempTimerID = setInterval(main , 5000);
+main();
 
 function get_wire(ds_id, next) {
 
