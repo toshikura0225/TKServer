@@ -28,7 +28,7 @@ function main() {
         console.log(`Reading ${id}.`);
 
         get_wire(id, (temp) => {
-            deviceList[id]["value"] = temp + deviceList[id]["offset"];
+            deviceList[id]["value"] = (temp !== null) ? temp + deviceList[id]["offset"] : null;
             //console.log(`temp=${deviceList[id]["value"]}(${temp})`);
             next();
         });
@@ -57,22 +57,34 @@ function get_wire(ds_id, next) {
     if (platform === 'linux') {
         let path = `/sys/bus/w1/devices/${ds_id}/w1_slave`;
 
-        fs.readFile(path, 'utf-8', (err, data) => {
-
-            // 例外処理
-            if (err) { throw err; }
-            let temp = null;
-
-            if (data.match(/YES/)) {
-
-                let matches = data.match(/t=(\d+)/);
-                temp = parseInt(matches[1]) / 1000;
-
+        fs.stat(path, (error, stats) => {
+            if (error) {
+                if (error.code === 'ENOENT') {
+                    console.log('ファイル・ディレクトリは存在しません。');
+                } else {
+                    console.log(error);
+                }
+                next(null);
             } else {
-                temp = null;
-            }
 
-            next(temp);
+                fs.readFile(path, 'utf-8', (err, data) => {
+
+                    // 例外処理
+                    if (err) { throw err; }
+                    let temp = null;
+
+                    if (data.match(/YES/)) {
+
+                        let matches = data.match(/t=(\d+)/);
+                        temp = parseInt(matches[1]) / 1000;
+
+                    } else {
+                        temp = null;
+                    }
+
+                    next(temp);
+                });
+            }
         });
     } else if (platform === 'win32') {
         let max = 30, min = -10;
