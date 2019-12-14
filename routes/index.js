@@ -27,7 +27,7 @@ router.get('/temps', function (req, res) {
 
     tempDB.serialize(() => {
 
-        tempDB.all('SELECT * FROM temps LIMIT 4', (err, rows) => {
+        tempDB.all('SELECT * FROM temps ORDER BY dt DESC LIMIT 4 ', (err, rows) => {
             if (err) {
                 console.error('Error!', error);
                 //return;
