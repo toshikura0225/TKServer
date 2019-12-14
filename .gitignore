@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 nohup.out
+temps.sqlite3.db
