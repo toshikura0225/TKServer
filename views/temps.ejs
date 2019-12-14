@@ -5,7 +5,8 @@
         <title></title>
     </head>
     <body>
-        <% ts = temps.split(',').join("<br>") %>
+        <% ts = temps %>
         <p><%- ts %></p>
+		<!-- JSON.parse(ts)[0]["dt"] -->
     </body>
 </html>

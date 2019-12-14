@@ -17,6 +17,10 @@ const request = require('request');
 const platform = require('os').platform();
 console.log(platform);
 
+// DB
+const sqlite3 = require('sqlite3').verbose();
+const tempDB = new sqlite3.Database('./temps.sqlite3.db');
+
 
 const temps_config = require('./temps.json');
 const deviceList = temps_config["deviceList"];
@@ -38,6 +42,12 @@ function main() {
         let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
         console.log(`Measured ${temps}`);
 
+        try {
+            tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
+            //tempDB.finalize();
+        } catch (e) {
+            console.error(`DB error:${e}`);
+        }
         request({
             method: 'get',
             url: `http://localhost:3000/set_temps?temps=${temps}`
