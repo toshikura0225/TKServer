@@ -5,7 +5,9 @@ var router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const tempDB = new sqlite3.Database('./temps.sqlite3.db');
 
-
+const gpio = require('rpi-gpio');
+const SW_PIN = 37;
+gpio.setup(SW_PIN, gpio.DIR_OUT);
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -21,6 +23,24 @@ router.get('/set_temps', function (req, res) {
 
     res.send("OK");
 });
+
+
+
+router.get('/sw', function (req, res) {
+
+    console.log("switch on");
+
+    gpio.write(SW_PIN, true);
+
+    setTimeout(() => {
+        gpio.write(SW_PIN, false);
+        console.log("switch off");
+    }, 500);
+
+    res.send("OK");
+});
+
+
 
 router.get('/temps', function (req, res) {
 
