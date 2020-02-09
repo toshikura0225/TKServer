@@ -84,10 +84,12 @@ function get_wire(ds_id, next) {
                     let temp = null;
 
                     if (data.match(/YES/)) {
-
-                        let matches = data.match(/t=(\d+)/);
-                        temp = parseInt(matches[1]) / 1000;
-
+                        try {
+                            let matches = data.match(/t=(\d+)/);
+                            temp = parseInt(matches[1]) / 1000;
+                        }catch(e) {
+                            console.log(error);
+                        }
                     } else {
                         temp = null;
                     }
