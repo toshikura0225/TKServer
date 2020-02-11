@@ -43,7 +43,8 @@ function main() {
         console.log(`Measured ${temps}`);
 
         try {
-            tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
+            //tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
+            tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5, t6,t7, t8, t9, t10) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]},${temps[5]},${temps[6]},${temps[7]},${temps[8]},${temps[9]})`);
             //tempDB.finalize();
         } catch (e) {
             console.error(`DB error:${e}`);
