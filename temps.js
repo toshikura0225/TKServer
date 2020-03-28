@@ -5,11 +5,16 @@ const async = require('async');
 const request = require('request');
 
 //var deviceList = {
-//    "28-030897790b03": { "offset": -0.984, "value": 0 },    // 外気温
-//    "28-0308977986cf": { "offset": -0.57, "value": 0 },     // 室温（上部）
-//    "28-030897791fc8": { "offset": 0.73, "value": 0 },      // 給水槽
-//    "28-030997796347": { "offset": 0.62, "value": 0 },      // 生育槽
-//    "28-031097791505": { "offset": 0, "value": 0 }          // 室温（下部）
+//    "28-030897790b03": { "offset": -0.984, "value": 0 },    // 1 ヒーター付き水槽内部
+//    "28-0308977986cf": { "offset": -0.57, "value": 0 },     // 2 ヒータ吹き出し温度
+//    "28-030897791fc8": { "offset": 0.73, "value": 0 },      // 3
+//    "28-030997796347": { "offset": 0.62, "value": 0 },      // 4
+//    "28-031097791505": { "offset": 0, "value": 0 }          // 5
+//    "28-031097791505": { "offset": 0, "value": 0 }          // 6 温調なし水温
+//    "28-031097791505": { "offset": 0, "value": 0 }          // 7 ハウス下部
+//    "28-031097791505": { "offset": 0, "value": 0 }          // 8 水耕栽培キット出口液温
+//    "28-031097791505": { "offset": 0, "value": 0 }          // 9 
+//    "28-031097791505": { "offset": 0, "value": 0 }          // 10 
 //};
 
 
@@ -43,9 +48,13 @@ function main() {
         console.log(`Measured ${temps}`);
 
         try {
-            //tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
-            tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5, t6,t7, t8, t9, t10) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]},${temps[5]},${temps[6]},${temps[7]},${temps[8]},${temps[9]})`);
-            //tempDB.finalize();
+            tempDB.serialize(function() {
+                //tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
+                let sql = `INSERT INTO temps (dt, t1, t2, t3, t4, t5, t6,t7, t8, t9, t10) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]},${temps[5]},${temps[6]},${temps[7]},${temps[8]},${temps[9]})`
+                console.log(sql);
+                tempDB.run(sql);
+                //tempDB.finalize();
+            });
         } catch (e) {
             console.error(`DB error:${e}`);
         }
