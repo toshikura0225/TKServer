@@ -13,14 +13,17 @@
     "async": "^3.1.0",
     "body-parser": "^1.15.0",
     "cookie-parser": "^1.4.0",
+    "date-utils": "^1.2.21",
     "debug": "^2.2.0",
     "ejs": "^2.7.1",
     "express": "^4.14.0",
+    "i2c-bus": "^5.1.0",
     "morgan": "^1.7.0",
+    "mysql": "^2.18.1",
     "pug": "^2.0.0-beta6",
     "request": "^2.88.0",
     "rpi-gpio": "^2.1.5",
     "serve-favicon": "^2.3.0",
-    "sqlite3": "^4.1.0"
+    "sqlite3": "^4.2.0"
   }
 }

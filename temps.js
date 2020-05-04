@@ -3,6 +3,7 @@
 const fs = require('fs');
 const async = require('async');
 const request = require('request');
+require('date-utils');
 
 //var deviceList = {
 //    "28-030897790b03": { "offset": -0.984, "value": 0 },    // 外気温
@@ -19,49 +20,105 @@ console.log(platform);
 
 // DB
 const sqlite3 = require('sqlite3').verbose();
-const tempDB = new sqlite3.Database('./temps.sqlite3.db');
+const tempDB = new sqlite3.Database('./temps.sqlite3');
 
 
 const temps_config = require('./temps.json');
 const deviceList = temps_config["deviceList"];
 
-function main() {
-
-    async.eachSeries(Object.keys(deviceList), (id, next) => {
-
-        console.log(`Reading ${id}.`);
-
-        get_wire(id, (temp) => {
-            deviceList[id]["value"] = (temp !== null) ? temp + deviceList[id]["offset"] : null;
-            //console.log(`temp=${deviceList[id]["value"]}(${temp})`);
-            next();
-        });
-    }, (err) => {
-        if (err) throw err;
-
-        let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
-        console.log(`Measured ${temps}`);
-
-        try {
-            //tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
-            tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5, t6,t7, t8, t9, t10) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]},${temps[5]},${temps[6]},${temps[7]},${temps[8]},${temps[9]})`);
-            //tempDB.finalize();
-        } catch (e) {
-            console.error(`DB error:${e}`);
-        }
-        request({
-            method: 'get',
-            url: `http://localhost:3000/set_temps?temps=${temps}`
-        }, (error, response, body) => {
-            //console.log(`error:${error}`);
-            //console.log(`body:${body}`);
-        });
-    });
-
+async function init() {
+    console.log("init");
+    await createTable();
 }
 
-var tempTimerID = setInterval(main , 60 * 1000);
-main();
+
+function main() {
+    console.log("main");
+    // 温度測定
+    main_temperature();
+}
+
+init().then(() => {
+    console.log("then");
+
+    var tempTimerID = setInterval(main, 60 * 1000);
+    main();
+});
+
+
+
+function main_temperature() {
+
+    tempDB.serialize(() => {
+
+        var stmt = tempDB.prepare('INSERT INTO t_temps (dt, name, temp) VALUES (?, ?, ?)');
+        let now = new Date().toFormat("YYYY-MM-DD HH24:MI:SS");
+
+        async.eachSeries(Object.keys(deviceList), (id, next) => {
+
+            console.log(`Reading ${id}.`);
+
+            get_wire(id, (temp) => {
+                deviceList[id]["value"] = (temp !== null) ? temp + deviceList[id]["offset"] : null;
+                console.log(`temp=${deviceList[id]["value"]}(${temp})`);
+                
+                let data = [now, deviceList[id]["name"], deviceList[id]["value"]];
+                stmt.run(data, (err_run) => {
+                    if (err_run) {
+                        console.log(`err_run=${err_run}`);
+                    }
+                    next();
+                });
+            });
+        }, (err) => {
+
+            stmt.finalize();
+            if (err) throw err;
+
+            let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
+            console.log(`Measured ${temps}`);
+
+            try {
+
+                /*
+                tempDB.serialize(() => {
+                    //tempDB.exec('BEGIN TRANSACTION');
+                    var stmt = tempDB.prepare('INSERT INTO t_temps (dt, name, temp) VALUES (?, ?, ?)');
+    
+                    var now = new Date();
+                    var data = ["2020-02-20 16:32:33", "aaab", 57.9];
+                    console.log(`run ${data}`);
+                    stmt.run(data, (err2) => {
+                        if (err2) {
+                            console.log(err2);
+                        }
+    
+                    });
+    
+    
+                    stmt.finalize();
+                    //tempDB.exec('COMMIT');
+                    console.log("finalized");
+    
+                    //tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
+                    //tempDB.run(`INSERT INTO temps (dt, name, temp) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]},${temps[5]},${temps[6]},${temps[7]},${temps[8]},${temps[9]})`);
+    
+                });
+                */
+
+            } catch (e) {
+                console.error(`DB error:${e}`);
+            }
+            request({
+                method: 'get',
+                url: `http://localhost:3000/set_temps?temps=${temps}`
+            }, (error, response, body) => {
+                console.log(`error:${error}`);
+                //console.log(`body:${body}`);
+            });
+        });
+    });
+}
 
 function get_wire(ds_id, next) {
 
@@ -104,6 +161,24 @@ function get_wire(ds_id, next) {
         let temp = Math.random() * (max + 1 - min) + min;
         next(temp);
     }
+
+}
+
+function createTable() {
+    return new Promise(resolve => {
+        tempDB.serialize(() => {
+            let sqls = [
+                'CREATE TABLE IF NOT EXISTS "t_temps"(\
+                    "dt"	TIMESTAMP,\
+                    "name"	TEXT,\
+                    "temp"	REAL)'
+                ];
+            
+            tempDB.run(sqls[0]);
+            console.log("run");
+            resolve();
+        });
+    });
 
 }
 

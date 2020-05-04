@@ -36,6 +36,9 @@
     </Compile>
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
+    <Compile Include="rtc.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="temps.js">
       <SubType>Code</SubType>
     </Compile>
