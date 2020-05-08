@@ -42,5 +42,6 @@
 		}
 	},
 	"global_ip_": "192.168.0.63:3000",
-	"global_ip": "114.16.11.207:3000"
+	"global_ip__": "114.16.11.207:3000",
+	"global_ip": "tkserver.herokuapp.com:3000"
 }
