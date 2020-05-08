@@ -24,6 +24,7 @@
     "request": "^2.88.0",
     "rpi-gpio": "^2.1.5",
     "serve-favicon": "^2.3.0",
+    "spi-device": "^3.1.0",
     "sqlite3": "^4.2.0"
   }
 }

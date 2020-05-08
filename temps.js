@@ -26,159 +26,182 @@ const tempDB = new sqlite3.Database('./temps.sqlite3');
 const temps_config = require('./temps.json');
 const deviceList = temps_config["deviceList"];
 
-async function init() {
-    console.log("init");
-    await createTable();
+
+async function main() {
+	console.log("main");
+
+	// 温度測定
+	await main_temperature();
+
+    // AD値測定
+    await main_ads();
 }
 
+(async () => {
+	console.log("init");
+	await createTable();
+})().then(() => {
+	console.log("then");
 
-function main() {
-    console.log("main");
-    // 温度測定
-    main_temperature();
-}
-
-init().then(() => {
-    console.log("then");
-
-    var tempTimerID = setInterval(main, 60 * 1000);
-    main();
+	var tempTimerID = setInterval(main, 60 * 1000);
+	main();
 });
-
 
 
 function main_temperature() {
 
-    tempDB.serialize(() => {
 
-        var stmt = tempDB.prepare('INSERT INTO t_temps (dt, name, temp) VALUES (?, ?, ?)');
-        let now = new Date().toFormat("YYYY-MM-DD HH24:MI:SS");
+	return new Promise(resolve => {
 
-        async.eachSeries(Object.keys(deviceList), (id, next) => {
+		tempDB.serialize(() => {
 
-            console.log(`Reading ${id}.`);
+			var stmt = tempDB.prepare('INSERT INTO t_temps (dt, name, temp) VALUES (?, ?, ?)');
+			let now = new Date().toFormat("YYYY-MM-DD HH24:MI:SS");
 
-            get_wire(id, (temp) => {
-                deviceList[id]["value"] = (temp !== null) ? temp + deviceList[id]["offset"] : null;
-                console.log(`temp=${deviceList[id]["value"]}(${temp})`);
-                
-                let data = [now, deviceList[id]["name"], deviceList[id]["value"]];
-                stmt.run(data, (err_run) => {
-                    if (err_run) {
-                        console.log(`err_run=${err_run}`);
-                    }
-                    next();
-                });
-            });
-        }, (err) => {
+			async.eachSeries(Object.keys(deviceList), (id, next) => {
 
-            stmt.finalize();
-            if (err) throw err;
+				console.log(`Reading ${id}.`);
 
-            let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
-            console.log(`Measured ${temps}`);
+				get_wire(id, (temp) => {
+					deviceList[id]["value"] = (temp !== null) ? temp + deviceList[id]["offset"] : null;
+					console.log(`temp=${deviceList[id]["value"]}(${temp})`);
 
-            try {
+					let data = [now, deviceList[id]["name"], deviceList[id]["value"]];
+					stmt.run(data, (err_run) => {
+						if (err_run) {
+							console.log(`err_run=${err_run}`);
+						}
+						next();
+					});
+				});
+			}, (err) => {
 
-                /*
-                tempDB.serialize(() => {
-                    //tempDB.exec('BEGIN TRANSACTION');
-                    var stmt = tempDB.prepare('INSERT INTO t_temps (dt, name, temp) VALUES (?, ?, ?)');
-    
-                    var now = new Date();
-                    var data = ["2020-02-20 16:32:33", "aaab", 57.9];
-                    console.log(`run ${data}`);
-                    stmt.run(data, (err2) => {
-                        if (err2) {
-                            console.log(err2);
-                        }
-    
-                    });
-    
-    
-                    stmt.finalize();
-                    //tempDB.exec('COMMIT');
-                    console.log("finalized");
-    
-                    //tempDB.run(`INSERT INTO temps (dt, t1, t2, t3, t4, t5) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]})`);
-                    //tempDB.run(`INSERT INTO temps (dt, name, temp) VALUES (datetime('now', 'localtime'), ${temps[0]},${temps[1]},${temps[2]},${temps[3]},${temps[4]},${temps[5]},${temps[6]},${temps[7]},${temps[8]},${temps[9]})`);
-    
-                });
-                */
+				stmt.finalize();
+				if (err) throw err;
 
-            } catch (e) {
-                console.error(`DB error:${e}`);
-            }
-            request({
-                method: 'get',
-                url: `http://localhost:3000/set_temps?temps=${temps}`
-            }, (error, response, body) => {
-                console.log(`error:${error}`);
-                //console.log(`body:${body}`);
-            });
-        });
-    });
+				let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
+				console.log(`Measured ${temps}`);
+
+                resolve();
+				//console.log("requesting");
+				//request({
+				//	method: 'get',
+				//	url: `http://localhost:3000/set_temps?temps=${temps}`
+				//}, (error, response, body) => {
+				//	console.log(`error:${error}`);
+				//	//console.log(`body:${body}`);
+				//});
+			});
+		});
+	});
 }
 
 function get_wire(ds_id, next) {
 
-    if (platform === 'linux') {
-        let path = `/sys/bus/w1/devices/${ds_id}/w1_slave`;
+	if (platform === 'linux') {
+		let path = `/sys/bus/w1/devices/${ds_id}/w1_slave`;
 
-        fs.stat(path, (error, stats) => {
-            if (error) {
-                if (error.code === 'ENOENT') {
-                    console.log('ファイル・ディレクトリは存在しません。');
-                } else {
-                    console.log(error);
-                }
-                next(null);
-            } else {
+		fs.stat(path, (error, stats) => {
+			if (error) {
+				if (error.code === 'ENOENT') {
+					console.log('ファイル・ディレクトリは存在しません。');
+				} else {
+					console.log(error);
+				}
+				next(null);
+			} else {
 
-                fs.readFile(path, 'utf-8', (err, data) => {
+				fs.readFile(path, 'utf-8', (err, data) => {
 
-                    // 例外処理
-                    if (err) { throw err; }
-                    let temp = null;
+					// 例外処理
+					if (err) { throw err; }
+					let temp = null;
 
-                    if (data.match(/YES/)) {
-                        try {
-                            let matches = data.match(/t=(\d+)/);
-                            temp = parseInt(matches[1]) / 1000;
-                        }catch(e) {
-                            console.log(error);
-                        }
-                    } else {
-                        temp = null;
-                    }
+					if (data.match(/YES/)) {
+						try {
+							let matches = data.match(/t=(\d+)/);
+							temp = parseInt(matches[1]) / 1000;
+						}catch(e) {
+							console.log(error);
+						}
+					} else {
+						temp = null;
+					}
 
-                    next(temp);
-                });
-            }
-        });
-    } else if (platform === 'win32') {
-        let max = 30, min = -10;
-        let temp = Math.random() * (max + 1 - min) + min;
-        next(temp);
-    }
+					next(temp);
+				});
+			}
+		});
+	} else if (platform === 'win32') {
+		let max = 30, min = -10;
+		let temp = Math.random() * (max + 1 - min) + min;
+		next(temp);
+	}
 
 }
 
 function createTable() {
-    return new Promise(resolve => {
-        tempDB.serialize(() => {
-            let sqls = [
-                'CREATE TABLE IF NOT EXISTS "t_temps"(\
-                    "dt"	TIMESTAMP,\
-                    "name"	TEXT,\
-                    "temp"	REAL)'
-                ];
-            
-            tempDB.run(sqls[0]);
-            console.log("run");
-            resolve();
-        });
-    });
+	return new Promise(resolve => {
+		tempDB.serialize(() => {
+			let sqls = [
+				'CREATE TABLE IF NOT EXISTS "t_temps"(\
+					"dt"	TIMESTAMP,\
+					"name"	TEXT,\
+					"temp"	REAL)'
+				];
+			
+			tempDB.run(sqls[0]);
+			console.log("run");
+			resolve();
+		});
+	});
 
 }
 
+// ==================  AD変換IC「MCP3208」関連 ==================
+
+const IC_MCP3208 = require('./my_lib/IC_MCP3208.js');
+var voltageIC_MCP3208 = new IC_MCP3208(5.0, 0.0);
+
+
+async function main_ads() {
+
+    console.log("reading ADs");
+	return new Promise(resolve => {
+
+		tempDB.serialize(() => {
+
+			var stmt = tempDB.prepare('INSERT INTO t_temps (dt, name, temp) VALUES (?, ?, ?)');
+			let now = new Date().toFormat("YYYY-MM-DD HH24:MI:SS");
+
+			async.eachSeries([...Array(8)].map((_, i) => i), (i, next) => {
+
+
+				console.log(`Reading CH${i}.`);
+
+				voltageIC_MCP3208.getADValue(i, (ch, voltage) => {
+					console.log(`Read CH${ch} = ${voltage}`);
+
+					let data = [now, `CH${ch}`, voltage];
+					stmt.run(data, (err_run) => {
+						if (err_run) {
+							console.log(`err_run=${err_run}`);
+						}
+						next();
+					});
+				});
+
+			}, (err) => {
+
+				stmt.finalize();
+				if (err) throw err;
+
+				let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
+                console.log(`Measured ${temps}`);
+
+                resolve();
+
+			});
+		});
+	});
+}
