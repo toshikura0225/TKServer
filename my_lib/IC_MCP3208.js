@@ -130,6 +130,9 @@ module.exports = class IC_MCP3208 {
 			//const celcius = (voltage - 0.5) * 100;
 
 			//this.voltageValue[channel] = voltage;
+
+			this.voltageValue[channel] = voltage;
+
 			read_callback(channel, voltage);
 		});
 	}

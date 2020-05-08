@@ -26,6 +26,7 @@ const tempDB = new sqlite3.Database('./temps.sqlite3');
 const temps_config = require('./temps.json');
 const deviceList = temps_config["deviceList"];
 
+var temps = null;
 
 async function main() {
 	console.log("main");
@@ -33,8 +34,19 @@ async function main() {
 	// 温度測定
 	await main_temperature();
 
-    // AD値測定
-    await main_ads();
+	// AD値測定
+	await main_ads();
+
+
+	console.log("requesting");
+	request({
+		method: 'get',
+		//url: `http://localhost:3000/set_temps?temps=${temps}`
+		url: `http://${temps_config['global_ip']}/set_temps?temps=${temps} / ${voltageIC_MCP3208.voltageValue}`
+	}, (error, response, body) => {
+		console.log(`error:${error}`);
+		console.log(`body:${body}`);
+	});
 }
 
 (async () => {
@@ -79,18 +91,11 @@ function main_temperature() {
 				stmt.finalize();
 				if (err) throw err;
 
-				let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
+				temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
 				console.log(`Measured ${temps}`);
 
-                resolve();
-				//console.log("requesting");
-				//request({
-				//	method: 'get',
-				//	url: `http://localhost:3000/set_temps?temps=${temps}`
-				//}, (error, response, body) => {
-				//	console.log(`error:${error}`);
-				//	//console.log(`body:${body}`);
-				//});
+
+				resolve();
 			});
 		});
 	});
@@ -166,7 +171,7 @@ var voltageIC_MCP3208 = new IC_MCP3208(5.0, 0.0);
 
 async function main_ads() {
 
-    console.log("reading ADs");
+	console.log("reading ADs");
 	return new Promise(resolve => {
 
 		tempDB.serialize(() => {
@@ -197,9 +202,9 @@ async function main_ads() {
 				if (err) throw err;
 
 				let temps = Object.keys(deviceList).map(id => deviceList[id]["value"]);
-                console.log(`Measured ${temps}`);
+				console.log(`Measured ${temps}`);
 
-                resolve();
+				resolve();
 
 			});
 		});
