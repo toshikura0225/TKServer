@@ -34,8 +34,12 @@
     <Compile Include="my_lib\DS18B20.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="my_lib\IC_MCP3208.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
+    <Compile Include="rtc.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="temps.js">
       <SubType>Code</SubType>
     </Compile>

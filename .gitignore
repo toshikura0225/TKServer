@@ -260,4 +260,8 @@ paket-files/
 __pycache__/
 *.pyc
 nohup.out
-temps.sqlite3.db
+temps.sqlite3
+
+# TK inserted
+.ipynb_checkpoints
+package-lock.json

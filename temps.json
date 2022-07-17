@@ -1,14 +1,47 @@
 ﻿{
-    "deviceList" : {
-        "28-030897790b03": { "offset": -0.984, "value": 0 },
-        "28-0308977986cf": { "offset": -0.2, "value": 0 }, 
-        "28-030897791fc8": { "offset": 0.73, "value": 0 },  
-        "28-030997796347": { "offset": 0.62, "value": 0 },  
-        "28-031097791505": { "offset": 1.5, "value": 0},
-        "28-01144d9b4aaa": { "offset": 0.0, "value": 0},
-        "28-01144d5a1baa": { "offset": 0.1, "value": 0},
-        "28-01144d3dc1aa": { "offset": 0, "value": 0},
-        "28-01144d29ddaa": { "offset": -0.2, "value": 0},
-        "28-01144d7c41aa": { "offset": -0.1, "value": 0}
-    }    
+	"deviceList": {
+		"28-030897790b03": {
+			"name": "0b03",
+			"offset": -0.984
+		},
+		"28-0308977986cf": {
+			"name": "86cf",
+			"offset": -0.2
+		},
+		"28-030897791fc8": {
+			"name": "1fc8",
+			"offset": 0.73
+		},
+		"28-030997796347": {
+			"name": "6347",
+			"offset": 0.62
+		},
+		"28-031097791505": {
+			"name": "1505",
+			"offset": 1.5
+		},
+		"28-01144d9b4aaa": {
+			"name": "4aaa",
+			"offset": 0.0
+		},
+		"28-01144d5a1baa": {
+			"name": "1baa",
+			"offset": 0.1
+		},
+		"28-01144d3dc1aa": {
+			"name": "c1aa",
+			"offset": 0
+		},
+		"28-01144d29ddaa": {
+			"name": "ddaa",
+			"offset": -0.2
+		},
+		"28-01144d7c41aa": {
+			"name": "41aa",
+			"offset": -0.1
+		}
+	},
+	"global_ip_": "192.168.0.63:3000",
+	"global_ip__": "114.16.11.207:3000",
+	"global_ip": "tkserver.herokuapp.com:3000"
 }
