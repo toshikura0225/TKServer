@@ -16,11 +16,13 @@
     "debug": "^2.2.0",
     "ejs": "^2.7.1",
     "express": "^4.14.0",
+    "mcp-spi-adc": "^3.0.0",
     "morgan": "^1.7.0",
     "pug": "^2.0.0-beta6",
     "request": "^2.88.0",
     "rpi-gpio": "^2.1.5",
     "serve-favicon": "^2.3.0",
+    "spi-device": "^3.0.0",
     "sqlite3": "^4.1.0"
   }
 }
